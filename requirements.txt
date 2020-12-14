@@ -2,6 +2,7 @@ catboost
 sklearn
 joblib
 Flask
+Flask-Cors
 json
 APScheduler
 Flask-APScheduler

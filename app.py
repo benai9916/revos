@@ -15,10 +15,10 @@ from preprocess import *
 from flask_apscheduler import APScheduler
 
 import time
-import atexit
+# import atexit
 
-from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
+# from apscheduler.schedulers.background import BackgroundScheduler
 
 
 app = Flask(__name__)
@@ -40,6 +40,7 @@ def data():
 	return None
 
 
+@scheduler.task('interval', id='do_job_2', seconds=30, misfire_grace_time=900)
 @app.route('/')
 def home():
 	aima_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/okla_catboost.sav'))
