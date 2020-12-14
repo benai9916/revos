@@ -31,12 +31,12 @@ class Config(object):
 scheduler = APScheduler()
 
 
-
-@scheduler.task('interval', id='do_job_1', seconds=20, misfire_grace_time=900)
+# call the data every 30 second
+@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
 def data():
 	global range_arguments
 	range_arguments = filter_data()
-	print('--- data',range_arguments)
+	# print('--- data',range_arguments)
 	return None
 
 
@@ -46,7 +46,9 @@ def home():
 
 	ride_range = aima_catBoost_model.predict(np.array(range_arguments))
 
-	print('--- result',ride_range)
+	print('--- -------------------------------- Range -----------------------')
+	print(ride_range)
+	print('--- -------------------------------- -----------------------',ride_range)
 
 	return str(ride_range)
 
