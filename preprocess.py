@@ -7,9 +7,9 @@ import os
 import random
 
 import time
-import atexit
-from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
-from apscheduler.schedulers.background import BackgroundScheduler
+# import atexit
+# from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
+# from apscheduler.schedulers.background import BackgroundScheduler
 
 
 new_data = pd.read_csv('data/new_data_okla.csv')

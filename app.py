@@ -31,16 +31,20 @@ class Config(object):
 scheduler = APScheduler()
 
 
+for i in range(1):
+	range_arguments = filter_data()
+
+
 # call the data every 30 second
-@scheduler.task('interval', id='do_job_1', seconds=30, misfire_grace_time=900)
+@scheduler.task('interval', id='do_job_1', seconds=20, misfire_grace_time=900)
 def data():
 	global range_arguments
 	range_arguments = filter_data()
-	# print('--- data',range_arguments)
+	print('--- data',range_arguments)
 	return None
 
 
-@scheduler.task('interval', id='do_job_2', seconds=30, misfire_grace_time=900)
+# @scheduler.task('interval', id='do_job_2', seconds=30, misfire_grace_time=900)
 @app.route('/')
 def home():
 	aima_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/okla_catboost.sav'))
