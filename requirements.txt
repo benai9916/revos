@@ -2,7 +2,7 @@ catboost
 sklearn
 joblib
 Flask
-Flask-Cors
+Flask-Cors==1.10.3
 json
 APScheduler
 Flask-APScheduler
