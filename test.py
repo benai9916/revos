@@ -89,27 +89,42 @@ scheduler = APScheduler()
 #     print('Job 2 executed')
 
 
-@scheduler.task('cron', id='do_job_3', week='*', day_of_week='mon')
-def job3():
-    print('Job 3 executed')
+# @scheduler.task('cron', id='do_job_3', week='*', day_of_week='mon')
+# def job3():
+#     print('Job 3 executed')
 
 
-@scheduler.task('interval', id='do_job_1', seconds=40, misfire_grace_time=900)
-@app.route('/')
-def home():
-	data = test()
-	print(data)
-	return str(data)
+# @scheduler.task('interval', id='do_job_1', seconds=40, misfire_grace_time=900)
+# @app.route('/')
+# def home():
+# 	data = test()
+# 	print(data)
+# 	return str(data)
 
 
 
-if __name__ == '__main__':
-    # app = Flask(__name__)
-    app.config.from_object(Config())
+# if __name__ == '__main__':
+#     # app = Flask(__name__)
+#     app.config.from_object(Config())
 
-    # it is also possible to enable the API directly
-    # scheduler.api_enabled = True
-    scheduler.init_app(app)
-    scheduler.start()
+#     # it is also possible to enable the API directlstatus_codey
+#     # scheduler.api_enabled = True
+#     scheduler.init_app(app)
+#     scheduler.start()
 
-    app.run()
+#     app.run()
+
+import requests
+import schedule
+import time
+
+def run_run():
+	res = requests.get('http://127.0.0.1:5000/range?tripDuration=0&GpsSpeed=0&voltageDrop=0&distance=0&availableAdc=70')
+	print(res.json())
+
+
+schedule.every(5).seconds.do(run_run)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)

@@ -5,8 +5,11 @@ from datetime import datetime
 from datetime import timedelta
 import os
 import random
+import requests
 
+import schedule
 import time
+import json
 # import atexit
 # from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 # from apscheduler.schedulers.background import BackgroundScheduler
@@ -92,5 +95,24 @@ def filter_data():
 	final_df['hr_sin'] = np.sin(minutee *(2.*np.pi/60))
 	final_df['hr_cos'] = np.cos(minutee *(2.*np.pi/60))
 
+	final_df = final_df[['hr_sin', 'hr_cos', 'possiblePowerAvailable', 'AvgWheelRPM','availableBatteryVoltage']]
 
-	return final_df[['hr_sin', 'hr_cos', 'possiblePowerAvailable', 'AvgWheelRPM','availableBatteryVoltage']]
+	# args = {'data': final_df.values.tolist()}
+
+	send_data = json.dumps(final_df.values.tolist())
+
+	print('------------',send_data)
+
+	if len(send_data) > 2 :
+		res = requests.get('http://127.0.0.1:5000/range?data='+send_data)
+
+		print('>>>>>>>>>>>>>>>>>>>>>..', res.json())
+
+		return res.json()
+
+
+schedule.every(5).seconds.do(filter_data)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
