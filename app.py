@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import os
 from flask_cors import CORS 
 import joblib
@@ -36,30 +36,9 @@ scheduler = APScheduler()
 # for i in range(1):
 # 	range_arguments = filter_data()
 
-
-# call the data every 30 second
-# @scheduler.task('interval', id='do_job_1', seconds=20, misfire_grace_time=900)
-# def data():
-# 	global range_arguments
-# 	range_arguments = filter_data()
-# 	print('--- data',range_arguments)
-# 	return None
-
-
-# @scheduler.task('interval', id='do_job_2', seconds=30, misfire_grace_time=900)
-# @app.route('/')
-# def home():
-# 	aima_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/okla_catboost.sav'))
-
-# 	ride_range = aima_catBoost_model.predict(np.array(range_arguments))
-
-# 	print('--- -------------------------------- Range -----------------------')
-# 	print(ride_range)
-# 	print('--- -------------------------------- -----------------------',ride_range)
-
-# 	distance = {'arguments': [list(i) for i in range_arguments.values],'range': round(ride_range.tolist()[0],2)}
-
-# 	return distance
+@app.route('/')
+def home():
+	return render_template('index.html')
 
 
 @app.route('/range', methods=['GET'])

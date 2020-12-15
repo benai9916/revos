@@ -4,66 +4,6 @@ import pandas as pd
 import numpy as np
 from preprocess import *
 
-# new_data = pd.read_csv('data/new_data_okla.csv')
-
-# def job():
-# 	# ids = id
-# 	return print('idsss')
-# 	# return print(new_data['tripId'].head(1))
-#     # print('executed')
-
-
-
-# for id in new_data.tripId.value_counts().index.to_list()[0:1]: 
-#   # min battery Voltage
-#   min_battery_voltage = new_data['underVoltageLimit'].unique().min()
-
-#   # inject each trip_id
-#   trip = new_data.loc[new_data['tripId'] == id].sort_values(by='time', ascending=True)
-
-#   # call the function
-#   final_df1 = schedule.every(10).seconds.do(job)
-
-
-# # print(ids)
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-
-
-# from flask import Flask
-# from flask_apscheduler import APScheduler
-
-# import time
-# import atexit
-
-# from apscheduler.schedulers.background import BackgroundScheduler
-
-
-
- 
-# app = Flask(__name__)
-
- 
-# def scheduled_task():
-#     print('Task  running iteration')
- 
-# @app.route('/')
-# def welcome():
-#     return 'Welcome to flask_apscheduler demo', 200
- 
-
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(func=scheduled_task, trigger="interval", seconds=3)
-# scheduler.start()
-
-
-# atexit.register(lambda: scheduler.shutdown())
-
-# if __name__ == '__main__':
-# 	app.run()
-
 
 from flask import Flask
 from flask_apscheduler import APScheduler
@@ -75,6 +15,9 @@ class Config(object):
 
 
 scheduler = APScheduler()
+
+
+# new_data = pd.read_csv('data/new_data_okla.csv')
 
 
 # interval examples
@@ -103,28 +46,26 @@ scheduler = APScheduler()
 
 
 
-# if __name__ == '__main__':
-#     # app = Flask(__name__)
-#     app.config.from_object(Config())
-
-#     # it is also possible to enable the API directlstatus_codey
-#     # scheduler.api_enabled = True
-#     scheduler.init_app(app)
-#     scheduler.start()
-
-#     app.run()
-
-import requests
-import schedule
-import time
-
-def run_run():
-	res = requests.get('http://127.0.0.1:5000/range?tripDuration=0&GpsSpeed=0&voltageDrop=0&distance=0&availableAdc=70')
-	print(res.json())
+# call the data every 30 second
+# @scheduler.task('interval', id='do_job_1', seconds=20, misfire_grace_time=900)
+# def data():
+# 	global range_arguments
+# 	range_arguments = filter_data()
+# 	print('--- data',range_arguments)
+# 	return None
 
 
-schedule.every(5).seconds.do(run_run)
+# @scheduler.task('interval', id='do_job_2', seconds=30, misfire_grace_time=900)
+# @app.route('/')
+# def home():
+# 	aima_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/okla_catboost.sav'))
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# 	ride_range = aima_catBoost_model.predict(np.array(range_arguments))
+
+# 	print('--- -------------------------------- Range -----------------------')
+# 	print(ride_range)
+# 	print('--- -------------------------------- -----------------------',ride_range)
+
+# 	distance = {'arguments': [list(i) for i in range_arguments.values],'range': round(ride_range.tolist()[0],2)}
+
+# 	return distance
