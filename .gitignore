@@ -4,5 +4,5 @@ Untitled.ipynb
 aws_key/
 get_data/node_modules
 config.py
-data/
-get_data/datas/
+data
+get_data/datas
