@@ -8,3 +8,5 @@ Flask-APScheduler
 numpy
 pandas
 scipy
+elasticsearch
+geopy

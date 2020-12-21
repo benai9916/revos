@@ -44,7 +44,7 @@ def home():
 @app.route('/range', methods=['GET'])
 def calculate_range():
 
-	okla_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/okla_catboost.sav'))
+	okla_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/lasoo2.sav'))
 
 	parms = request.args.getlist('data')
 

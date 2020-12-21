@@ -6,6 +6,7 @@ from datetime import timedelta
 import os
 import random
 import requests
+import geopy.distance
 
 import schedule
 import time
@@ -15,14 +16,50 @@ import json
 # from apscheduler.schedulers.background import BackgroundScheduler
 
 
-new_data = pd.read_csv('data/new_data_okla.csv')
+# load_data = pd.read_csv('okla_office_white _new.csv')
 
 
-one_voltage_power_consumed = 26962.15783860644
-one_voltage_ride_duration = pd.to_timedelta('00:01:20.945609669')
+one_voltage_power_consumed = 2971.5567
+# one_voltage_ride_duration = pd.to_timedelta('00:01:09.571291076')
+
+def adjust_battery_voltage(volt, under_battery_vol):
+  # if volt > over_battery_vol:
+  #   return over_battery_vol - under_battery_vol
+  # else:
+    return volt - under_battery_vol 
 
 
-def filter_data():
+def pre_process(df):
+	# drop any missing values
+	new_data = df.dropna()
+
+	# select columns
+	new_data = new_data[['tripId', 'type', 'latitude', 'longitude','batteryVoltage',
+	 'batteryCurrent', 'wheelRpm', 'throttle', 'timestamp', 'underVoltageLimit', 'overVoltageLimit']]
+
+	# over_battery_vol = new_data['overVoltageLimit'].mean()
+	under_battery_vol = new_data['underVoltageLimit'].mean()
+
+	# change the timestampe with datetime formate
+	new_data['timestamp'] = new_data['timestamp'].apply(lambda x : datetime.fromtimestamp(x/1000).strftime('%Y-%m-%d %H:%M:%S'))
+
+	# crete new date and time column
+	new_data['date'] = [d.split(' ')[0] for d in new_data['timestamp']]
+	new_data['time'] = [d.split(' ')[1] for d in new_data['timestamp']]
+
+	# calculate the under and over battery voltage
+	under_battery_vol = new_data['underVoltageLimit'].mode().values[0]
+	over_battery_vol = new_data['overVoltageLimit'].mode().values[0]
+	new_data['batteryVoltage'] = new_data['batteryVoltage'].apply(lambda x : adjust_battery_voltage(x, under_battery_vol) )
+
+
+	# print(new_data.head(1))
+
+	filter_data(new_data)
+
+
+
+def filter_data(new_data):
 	distance_covered = []
 	dropped_battery_voltage = []
 	trip_id = []
@@ -31,11 +68,12 @@ def filter_data():
 	power_consumed = []
 	avg_wheel_rpm = []
 	trip_duration = []
+	avg_throttle = []
 
 	 # analyze by trip_id
-	for id in random.sample(new_data.tripId.value_counts().index.to_list(), 1): 
+	for id in random.sample(new_data.tripId.value_counts().index.to_list(), 1):
 		# min battery Voltage
-		min_battery_voltage = new_data['underVoltageLimit'].unique().min()
+		# min_battery_voltage = new_data['underVoltageLimit'].unique().min()
 
 		# inject each trip_id
 		trip_one = new_data.loc[new_data['tripId'] == id].sort_values(by='time', ascending=True)
@@ -56,46 +94,63 @@ def filter_data():
 		trip_id.append(id)
 
 		# availabe battery voltage
-		available_battery_voltage.append(trip_one['batteryVoltage'].min() -  min_battery_voltage)
+		available_battery_voltage.append(trip_one['batteryVoltage'].min())
 
 		# distance travel from the starting of the trip to end
-		distance_covered.append(round(trip_one['odometer'].max() - trip_one['odometer'].min(),2))
+		# distance_covered.append(round(trip_one['odometer'].max() - trip_one['odometer'].min(),2))
+		if trip_one['latitude'].head(1).values[0] != 0 and trip_one['latitude'].tail(1).values[0] != 0:
+		  	coords_1 = (trip_one['latitude'].head(1).values[0], trip_one['longitude'].head(1).values[0])
+		  	coords_2 = (trip_one['latitude'].tail(1).values[0], trip_one['longitude'].tail(1).values[0])
+
+		  	distance_covered.append(geopy.distance.geodesic(coords_1, coords_2).km)
+		else:
+		  	distance_covered.append(0)
 
 		# battery voltage utilize during the trip
 		dropped_battery_voltage.append(trip_one['batteryVoltage'].max() - trip_one['batteryVoltage'].min())
 
 		# power consumed during the trip
-		power_consumed.append(round(trip_one['power_consumption'].sum()))
+		power_consumed.append(round(trip_one['power_consumption'].sum(), 2))
 
 		# Average wheelrmp during the trip
-		avg_wheel_rpm.append(round(trip_one['wheelRpm'].mean()))
+		avg_wheel_rpm.append(round(trip_one['wheelRpm'].mean(), 2))
+
+		# Average throtle during the trip
+		avg_throttle.append(round(trip_one['throttle'].mean(), 2))
 
 
 		final_df = pd.DataFrame({'tripId': trip_id,'tripDuration': trip_duration, 'powerConsumed': power_consumed,
-		                   'AvgWheelRPM': avg_wheel_rpm, 'batteryVoltageUsed':dropped_battery_voltage, 
+		                   'AvgWheelRPM': avg_wheel_rpm, 'batteryVoltageUsed':dropped_battery_voltage, 'AvgThrottle': avg_throttle,
 		                   'DistanceCovered':distance_covered,'availableBatteryVoltage': available_battery_voltage,
 		                   })
+
 	# Calculate possible distance a rider can cover with the remaining battery
-	final_df['possibleRideAvailable'] = round(final_df['availableBatteryVoltage'] * (final_df['DistanceCovered'] /final_df['batteryVoltageUsed']))
+	# final_df['possibleRideAvailable'] = final_df['availableBatteryVoltage'] * (final_df['DistanceCovered'] /final_df['batteryVoltageUsed'])
 
 	# calculate the posible duration it can give
-	final_df['possibleRideDuration'] = final_df['availableBatteryVoltage'].apply(lambda x : str(one_voltage_ride_duration * x).split(' ')[-1])
+	# final_df['possibleRideDuration'] = final_df['availableBatteryVoltage'].apply(lambda x : str(one_voltage_ride_duration * x).split(' ')[-1])
 
 	# calculate the possible power battery will give
-	final_df['possiblePowerAvailable'] = final_df['availableBatteryVoltage'].apply(lambda x : x * one_voltage_power_consumed)
-
-	# drop column if battery voltage is 0
-	final_df = final_df[~(final_df['possibleRideAvailable'] == np.inf)]
+	if final_df['batteryVoltageUsed'].sum() == 0:
+		# mean_power_consumed = final_df['powerConsumed'].mean()
+		# mean_voltage_used = final_df['batteryVoltageUsed'].mean()
+		# one_voltage_power_consumed = round(mean_power_consumed / mean_voltage_used, 2)
+		final_df['possiblePowerAvailable'] = final_df['availableBatteryVoltage'].apply(lambda x : x * one_voltage_power_consumed)
+	else:
+		final_df['possiblePowerAvailable'] = final_df['availableBatteryVoltage'] * (final_df['powerConsumed'] / final_df['batteryVoltageUsed'])
+	
+	# if value is inf then replace with 0
+	# final_df['possibleRideAvailable'] = final_df[['possibleRideAvailable']].replace(np.inf, 0)
 
 	# drop all those ride that have cover zero distance
 	final_df.dropna(inplace=True)
 
-	minutee = pd.to_datetime(final_df['tripDuration'].values).hour * 60 + pd.to_datetime(final_df['tripDuration'].values).minute + pd.to_datetime(final_df['tripDuration'].values).second / 60
+	# minutee = pd.to_datetime(final_df['tripDuration'].values).hour * 60 + pd.to_datetime(final_df['tripDuration'].values).minute + pd.to_datetime(final_df['tripDuration'].values).second / 60
 
-	final_df['hr_sin'] = np.sin(minutee *(2.*np.pi/60))
-	final_df['hr_cos'] = np.cos(minutee *(2.*np.pi/60))
+	# final_df['hr_sin'] = np.sin(minutee *(2.*np.pi/60))
+	# final_df['hr_cos'] = np.cos(minutee *(2.*np.pi/60))
 
-	final_df = final_df[['hr_sin', 'hr_cos', 'possiblePowerAvailable', 'AvgWheelRPM','availableBatteryVoltage']]
+	final_df = final_df[['batteryVoltageUsed', 'powerConsumed', 'AvgWheelRPM', 'AvgThrottle']]
 
 	# args = {'data': final_df.values.tolist()}
 
@@ -103,7 +158,7 @@ def filter_data():
 
 	print('------------',send_data)
 
-	if len(send_data) > 2 :
+	if (len(send_data) > 2) and  (final_df['batteryVoltageUsed'].values[0] >= 0.5):
 		res = requests.get('http://127.0.0.1:5000/range?data='+send_data)
 
 		print('>>>>>>>>>>>>>>>>>>>>>..', res.json())
@@ -111,8 +166,10 @@ def filter_data():
 		return res.json()
 
 
-schedule.every(5).seconds.do(filter_data)
+# load_data()
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# schedule.every(5).seconds.do(clean_data, load_data)
+
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
