@@ -3,7 +3,16 @@ import sys
 import schedule
 import time
 import json
-from static.preprocess import load_data
+# from .static import preprocess
+# from ..config import *
+
+sys.path.insert(1, './static/preprocess')
+sys.path.insert(1, './')
+
+from config import ES_INDEX, ES_URL
+from static.preprocess import *
+
+print(ES_INDEX)
 
 start_time = time.time()
 
@@ -30,7 +39,7 @@ def pull_elastic_data():
     # create a client instance of the library
     print ("\ncreating client instance of Elasticsearch")
 
-    elastic_client = Elasticsearch("https://search-rev-elastic-pavbwqniud3xfj2ufsvvrkiive.ap-south-1.es.amazonaws.com")
+    elastic_client = Elasticsearch(ES_URL)
 
     """
     MAKE API CALL TO CLUSTER AND CONVERT
@@ -54,7 +63,7 @@ def pull_elastic_data():
     print ("\nmaking API call to Elasticsearch for", total_docs, "documents.")
 
     response = elastic_client.search(
-        index='events-rev-es-vehicle000',
+        index=ES_INDEX,
         body= search_body_v,
         size=total_docs,
         scroll='1m',
@@ -95,7 +104,7 @@ def pull_elastic_data():
         # append the Series object to the DataFrame object
         docs = docs.append(doc_data)
 
-    # pre_process the data 
+    # pre_process the data
     pre_process(docs)
 
     print ("\n\ntime elapsed:", time.time()-start_time)

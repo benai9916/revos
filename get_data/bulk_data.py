@@ -1,11 +1,12 @@
 from elasticsearch import Elasticsearch, helpers, exceptions
+from config import *
 
 import json
 import pandas
 import time
 
 # declare an instance of the Elasticsearch library
-client = Elasticsearch("https://search-rev-elastic-pavbwqniud3xfj2ufsvvrkiive.ap-south-1.es.amazonaws.com", timeout=30)
+client = Elasticsearch(ES_URL, timeout=30)
 
 # set client to 'None' if invalid
 try:
@@ -32,7 +33,7 @@ if client != None:
 
     # # make a search() request to scroll documents
     # resp = client.search(
-    #     index = "events-rev-es-vehicle000",
+    #     index = "ES_INDEX",
     #     size= 8900,
     #     body = search_body_v,
     #     scroll = '10s', # time value for search
@@ -102,7 +103,7 @@ if client != None:
 
 # start = time.time()
 # res = client.search(
-#     index = 'events-rev-es-vehicle000',
+#     index = 'ES_INDEX',
 #     scroll = '2m',
 #     size = 10,
 #     body = search_body_v,
