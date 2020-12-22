@@ -4,6 +4,14 @@
 	<title>Range</title>
 </head>
 <body>
-	<h3>Nothing here<br> Go to /range?data=[[provide 5 arguments in numbers]]</h3>
+	{% if distance !=0 %}
+		<p>batteryVoltage: {{parms[0]}}</p>
+		<p>ExpectedPower: {{parms[1]}}</p>
+		<p>AvgWheelRPM: {{parms[2]}}</p>
+		<p>AvgThrottle: {{parms[3]}}</p>
+		<h2>{{range}}(km)</h2>
+		<br>
+	{% endif %}
+	<p>To call API<br> Go to /range?data=[[provide 4 arguments (batteryVoltage, ExpectedPower, AvgWheelRPM, AvgThrottle)]]</p>
 </body>
 </html>

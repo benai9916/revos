@@ -1,9 +1,17 @@
 from elasticsearch import Elasticsearch, helpers, exceptions
-from config import *
 
 import json
 import pandas
 import time
+import sys
+import time
+
+sys.path.insert(1, './')
+
+from config import ES_INDEX, ES_URL
+
+
+start_time = time.time()
 
 # declare an instance of the Elasticsearch library
 client = Elasticsearch(ES_URL, timeout=30)
@@ -24,25 +32,24 @@ if client != None:
         "query": {
             "bool": {
                 "must": [
-                    {"match": {'vin': 'OKLA_OFFICE_WHITE'}},
-                    {"match": {'type': 1}},
+                    {"match": {'vin': 'M22YCESD20B000705'}}
                 ]
             }
         }
     }
 
-    # # make a search() request to scroll documents
+    # make a search() request to scroll documents
     # resp = client.search(
-    #     index = "ES_INDEX",
+    #     index = ES_INDEX,
     #     size= 8900,
     #     body = search_body_v,
-    #     scroll = '10s', # time value for search
+    #     scroll = '10m', # time value for search
     #     _source= ['vin','tripId','type' ,'timestamp','batteryCurrent', 'batteryVoltage', 'latitude', 
     #             'longitude', 'throttle', 'wheelRpm', 'underVoltageLimit', 'overVoltageLimit', 'gps_speed'],
     #     request_timeout=30
 
     # )
-    # print ("total docs:", len(resp["hits"]["hits"]))
+    # # print ("total docs:", len(resp["hits"]["hits"]))
 
     # # get the JSON response's scroll_id
     # scroll_id = resp['_scroll_id']
@@ -50,22 +57,22 @@ if client != None:
     # # scroll Elasticsearch docs with scroll() method
     # resp = client.scroll(
     #     scroll_id = scroll_id,
-    #     scroll = '10s', # time value for search
+    #     scroll = '10m', # time value for search
     #     request_timeout=30
     # )
 
     # print ('scroll() query length:', len(resp))
 
-    # # get the JSON response's scroll_id
+    # get the JSON response's scroll_id
     # scroll_id = resp['_scroll_id']
 
     # call the helpers library's scan() method to scroll
     resp = helpers.scan(
         client,
         scroll = '10m',
-        size = 10,
-        _source= ['vin','tripId','type' ,'timestamp','batteryCurrent', 'batteryVoltage', 'latitude', 
-        'longitude', 'throttle', 'wheelRpm', 'underVoltageLimit', 'overVoltageLimit', 'gps_speed'],
+        size = 10000,
+        # _source= ['vin','tripId','type' ,'timestamp','batteryCurrent', 'batteryVoltage', 'latitude', 
+        # 'longitude', 'throttle', 'wheelRpm', 'odometer' 'underVoltageLimit', 'overVoltageLimit', 'gps_speed'],
         query=search_body_v,
         request_timeout=30
     )
@@ -73,12 +80,13 @@ if client != None:
     #  create an empty Pandas DataFrame object for docs
     docs = pandas.DataFrame()
 
+
     # enumerate the documents
     try:
         for num, doc in enumerate(resp):
-            if num != 300000:
+            if num != 100:
                 print ('\n----------------------------------', num, doc['_source'])
-                print(doc['_id'], doc['_source'])
+                # print(doc['_id'], doc['_source'])
 
                 # get _source data dict from document
                 source_data = doc["_source"]
@@ -95,10 +103,12 @@ if client != None:
                 break
     except Exception as e:
         print('Error', e)
-        docs.to_csv("data/bulk_data.csv", ",")
+        docs.to_csv("data/M22YCESD20B000705.csv", ",")
         
     # export Elasticsearch documents to a CSV file
-    docs.to_csv("data/bulk_data.csv", ",")
+    docs.to_csv("data/M22YCESD20B000705.csv", ",")
+
+print('Total time: ', time.time() - start_time)
 
 
 # start = time.time()

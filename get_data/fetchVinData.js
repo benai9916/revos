@@ -6,7 +6,7 @@ let data = {
     index: 'events-rev-es-vehicle000',
     type: '',
     size: '10000',
-    scroll: '10s',
+    scroll: '10m',
     body: {
       query: {
         "match": {
@@ -20,10 +20,12 @@ let data = {
 let client = new elasticsearch.Client({
   host: 'https://search-rev-elastic-pavbwqniud3xfj2ufsvvrkiive.ap-south-1.es.amazonaws.com',
 });
+
  
 fetchAll = (event, context, callback) => { 
   var json = [];
 client.search(data , function getMoreUntilDone(error, response) {
+  console.log(response)
   // collect all the records]
   response.hits.hits.forEach(function (hit) {
     json.push(hit);
@@ -34,28 +36,27 @@ client.search(data , function getMoreUntilDone(error, response) {
     // now we can call scroll over and over
     client.scroll({
       scrollId: response._scroll_id,
-      scroll: '10s'
+      scroll: '10m'
     }, getMoreUntilDone);
   } else {
         console.log('all done', json.length);
         let fields = Object.keys(json[json.length -1])
         // let objFieldsSource = Object.keys(json[json.length -1]['_source']);
         let objFieldsSource = [
-          "altitude",
-          "signalCondition",
-          "ignition",
-          "batteryVoltageAdc",
-          "controllerTemperature",
-          "gpsSpeed",
-          "ignition",
-          "latitude",
-          "longitude",
-          "relativeSOC",
-          "ridingCurrent",
-          "tbitParsedTimeStamp",
-          "timestamp",
-          "tripId"
-        ];
+        'vin',
+        'tripId',
+        'type',
+        'timestamp',
+        'batteryCurrent',
+        'batteryVoltage', 
+        'latitude', 
+        'longitude',
+        'throttle', 
+        'wheelRpm', 
+        'underVoltageLimit', 
+        'overVoltageLimit', 
+        'gps_speed'];
+
         let replacer = function(key, value) { return value === null ? '' : value }
         console.log(objFieldsSource)
         let csv = json.map(function(row){

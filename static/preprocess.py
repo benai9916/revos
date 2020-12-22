@@ -11,21 +11,14 @@ import geopy.distance
 import schedule
 import time
 import json
-# import atexit
-# from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
-# from apscheduler.schedulers.background import BackgroundScheduler
 
-
-# load_data = pd.read_csv('okla_office_white _new.csv')
+# load_data = pd.read_csv('data/okla_office_white _new.csv')
 
 
 one_voltage_power_consumed = 2971.5567
 # one_voltage_ride_duration = pd.to_timedelta('00:01:09.571291076')
 
 def adjust_battery_voltage(volt, under_battery_vol):
-  # if volt > over_battery_vol:
-  #   return over_battery_vol - under_battery_vol
-  # else:
     return volt - under_battery_vol 
 
 
@@ -158,17 +151,18 @@ def filter_data(new_data):
 
 	print('------------',send_data)
 
-	if (len(send_data) > 2) and  (final_df['batteryVoltageUsed'].values[0] >= 0.5):
-		res = requests.get('http://127.0.0.1:5000/range?data='+send_data)
+	if (len(send_data) > 2) and  (final_df['batteryVoltageUsed'].values[0] >= 0.3):
+		res = requests.get('http://15.206.179.38/range?data='+send_data)
+
+		# requests.get('http://15.206.179.38/?data='+send_data)
 
 		print('>>>>>>>>>>>>>>>>>>>>>..', res.json())
 
 		return res.json()
 
+# pre_process(load_data)
 
-# load_data()
-
-# schedule.every(5).seconds.do(clean_data, load_data)
+# schedule.every(5).seconds.do(pre_process, load_data)
 
 # while True:
 #     schedule.run_pending()

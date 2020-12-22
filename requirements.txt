@@ -4,9 +4,10 @@ joblib
 Flask
 Flask-Cors==1.10.3
 APScheduler
-Flask-APScheduler
 numpy
 pandas
 scipy
 elasticsearch
 geopy
+schedule
+requests
