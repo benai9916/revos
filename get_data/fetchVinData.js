@@ -1,6 +1,6 @@
 const fs = require('fs');
 var elasticsearch = require('elasticsearch');
-const outputFileName = 'AIMA_OFFICE.csv'
+const outputFileName = 'M22YCESD20J002044--12.csv'
  
 let data = {
     index: 'events-rev-es-vehicle000',
@@ -10,7 +10,7 @@ let data = {
     body: {
       query: {
         "match": {
-          "vin": "AIMA_OFFICE",
+          "vin": "M22YCESD20V000706",
         }
       },
     }
@@ -24,8 +24,7 @@ let client = new elasticsearch.Client({
  
 fetchAll = (event, context, callback) => { 
   var json = [];
-client.search(data , function getMoreUntilDone(error, response) {
-  console.log(response)
+client.search(data , function getMoreUntilDone(error, response) { 
   // collect all the records]
   response.hits.hits.forEach(function (hit) {
     json.push(hit);
@@ -43,19 +42,18 @@ client.search(data , function getMoreUntilDone(error, response) {
         let fields = Object.keys(json[json.length -1])
         // let objFieldsSource = Object.keys(json[json.length -1]['_source']);
         let objFieldsSource = [
-        'vin',
         'tripId',
-        'type',
-        'timestamp',
-        'batteryCurrent',
-        'batteryVoltage', 
+        'vin', 
+        'timestamp', 
+        'relativeSOC', 
+        'batteryVoltageAdc', 
+        'gpsSpeed', 
+        'ignition', 
         'latitude', 
-        'longitude',
-        'throttle', 
-        'wheelRpm', 
-        'underVoltageLimit', 
-        'overVoltageLimit', 
-        'gps_speed'];
+        'longitude', 
+        'ridingCurrent',
+        'chargeDischargeTimes', 
+        'totalMilage'];
 
         let replacer = function(key, value) { return value === null ? '' : value }
         console.log(objFieldsSource)

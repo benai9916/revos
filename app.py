@@ -6,7 +6,7 @@ import json
 import numpy as np
 
 # ml libraries
-# from catboost import CatBoostRegressor
+from catboost import CatBoostRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_squared_log_error, r2_score, explained_variance_score
 
@@ -21,11 +21,9 @@ app.config['DEBUG'] = True
 
 
 def model(parms):
-	global distance
 	global  arguments
-	distance = 0
 
-	okla_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/lasoo2.sav'))
+	okla_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/cb_combine.sav'))
 
 	parms = [i for i in json.loads((parms[0]))[0]]
 
@@ -40,17 +38,20 @@ def model(parms):
 
 @app.route('/')
 def home():
-	if distance != 0:
-		return render_template('index.html', range=distance, parms=arguments)
-	else:
-		return render_template('index.html')
+	try:
+	# a = {'a':arguments[0], 'b': arguments[1], 'c': arguments[2], 'd': arguments[3]}
+		return render_template('index.html', range=distance, four_parms=arguments)
+	except:
+		return 'please reload'
 
 
 @app.route('/range', methods=['GET'])
 def calculate_range():
-	parms = request.args.getlist('data')
+	global distance
+	global four_parms
+	four_parms = request.args.getlist('data')
 
-	distance = model(parms)
+	distance = model(four_parms)
 	
 	return distance
 
