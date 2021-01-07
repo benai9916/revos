@@ -17,9 +17,7 @@ import json
 
 MIN_VOLTAGE = 46
 
-
 def pre_process(df):
-	print(df.shape)
 	df['time'] = df['timestamp'].apply(lambda x : x.split('T')[1][0:-1])
 	df['date'] = df['timestamp'].apply(lambda x : x.split('T')[0])
 
@@ -35,12 +33,14 @@ def pre_process(df):
 	# substract battery voltage with the minimum battery voltage
 	new_df_with_tripid['batteryVoltageAdc'] = new_df_with_tripid['batteryVoltageAdc'].apply(lambda x : x - 46)
 
-
 	filter_data(new_df_with_tripid)
 
 
-
+active_vin = []
 def filter_data(new_data):
+	# global active_vin
+	
+	print('ths is vin ->', (active_vin))
 	trip_id = []
 	trip_duration = []
 	distance_covered = []
@@ -48,14 +48,26 @@ def filter_data(new_data):
 	available_battery_voltage = []
 	avg_gps_speed = []
 	initial_battery_voltage = []
-	
-	# analyze by trip_id
-	for id in random.sample(new_data.tripId.value_counts().index.to_list(), 1):
-		# sort trip id
-		trip_one = new_data.loc[new_data['tripId'] == id].sort_values(by='time', ascending=True)
+	vin = []
+
+	if len(active_vin) != 0:
+		new_data =  new_data.loc[new_data['vin'] == active_vin[-1]]
+
+	single_trip_id = random.sample(new_data['tripId'].value_counts().index.to_list(), 1)[0]
+
+	if 0 not in new_data.loc[new_data['tripId'] == single_trip_id]['ignition'].unique():
+
+		# analyze by trip_id
+		# for id in trip_id:
+			# sort trip id
+		trip_one = new_data.loc[new_data['tripId'] == single_trip_id].sort_values(by='time', ascending=True)
+
+		print('this is the shape', trip_one.shape)
+
+		vin.append(trip_one['vin'].values[0])
 		
 		# trip id
-		trip_id.append(id)
+		trip_id.append(single_trip_id)
 
 		# trip duration 
 		# trip start and end time
@@ -88,32 +100,42 @@ def filter_data(new_data):
 
 
 		final_df1 = pd.DataFrame({'tripId': trip_id, 'tripDuration': trip_duration,
-								'BatteryVoltageOnIgnition': initial_battery_voltage, 'availableBatteryVoltage': available_battery_voltage, 'avgGpsSpeed': avg_gps_speed,
-								'batteryVoltageUsed':dropped_battery_voltage, 'DistanceCovered':distance_covered})
+							'BatteryVoltageOnIgnition': initial_battery_voltage, 'availableBatteryVoltage': available_battery_voltage, 'avgGpsSpeed': avg_gps_speed,
+								'droppedBatteryVoltage': dropped_battery_voltage, 'DistanceCovered':distance_covered})
 
 
-	# Calculate possible distance a rider can cover with the remaining battery
-	final_df1['possibleRideAvailable'] = final_df1['availableBatteryVoltage'] * (final_df1['DistanceCovered'] / final_df1['batteryVoltageUsed'])
+		final_df1['vin'] = vin
 
-	# arguments for the model
-	final_df = final_df1[['availableBatteryVoltage','batteryVoltageUsed', 'DistanceCovered','avgGpsSpeed']]
+		if len(active_vin) != 0 and final_df1['vin'].values[0] in active_vin:
+			pass
+		else:
+			active_vin.append(final_df1['vin'].values[0])
 
-	# args = {'data': final_df.values.tolist()}
 
-	send_data = json.dumps(final_df.values.tolist())
+		# Calculate possible distance a rider can cover with the remaining battery
+		final_df1['possibleRideAvailable'] = final_df1['availableBatteryVoltage'] * (final_df1['DistanceCovered'] / final_df1['droppedBatteryVoltage'])
 
-	print('------------',send_data)
+		# arguments for the model
+		final_df = final_df1[['availableBatteryVoltage','droppedBatteryVoltage', 'DistanceCovered','avgGpsSpeed']]
 
-	if final_df['batteryVoltageUsed'].values[0] >= 0.01:
-	# res = requests.get('http://15.206.179.38/range?data='+send_data)
-		res = requests.get('http://127.0.0.1:5000/range?data='+send_data)
-	
+		# args = {'data': final_df.values.tolist()}
 
-		# requests.get('http://15.206.179.38/?data='+send_data)
+		send_data = json.dumps(final_df.values.tolist())
 
-		print('>>>>>>>>>>>>>>>>>>>>>..', res.json())
+		# print('------------',send_data)
 
-		return res.json()
+		if final_df['droppedBatteryVoltage'].values[0] >= 0.01 and final_df['DistanceCovered'].values[0] != 0:
+			res = requests.get('http://15.206.179.38/range?data='+send_data)
+			# res = requests.get('http://127.0.0.1:5000/range?data='+send_data).json()
+
+			# requests.get('http://15.206.179.38/?data='+send_data)
+
+			print('Data for vim ', active_vin[-1], res)
+
+			# return res
+	else:
+		active_vin.clear()
+		pass
 
 # pre_process(load_data)
 

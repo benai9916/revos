@@ -41,16 +41,20 @@ def pull_elastic_data():
     ELASTICSEARCH DOCUMENTS
     """
     # total num of Elasticsearch documents to get with API call
-    total_docs = 2300
+    total_docs = 3000
+    active_vin = []
+    # vim = 'M22YCESD20B000705'
 
     search_body_v = {
         "query": {
             "bool": {
                 "must": [
-                    {"match": {'vin': 'M22YCESD20B000705'}},
+                    # {"match": {'vin': vim}},
+                    {"match": {'type': 'ANALYTICS'}}
                 ]
             }
-        }
+        },
+        "sort": { "timestamp": "desc"},
     }
 
     print ("\nmaking API call to Elasticsearch for", total_docs, "documents.")
@@ -72,7 +76,7 @@ def pull_elastic_data():
         'longitude', 
         'ridingCurrent',
         'chargeDischargeTimes', 
-        'totalMilage']   
+        'totalMilage', 'type']   
     )
 
     # print(response['_scroll_id'])
@@ -83,7 +87,7 @@ def pull_elastic_data():
     # print ("putting documents in a list")
     elastic_docs = response["hits"]["hits"]
 
-    # print(type(elastic_docs))
+    # print((elastic_docs))
 
     """
     GET ALL OF THE ELASTICSEARCH
@@ -97,6 +101,8 @@ def pull_elastic_data():
 
         # get _source data dict from document
         source_data = doc["_source"]
+
+        # print((source_data))
 
         # get _id from document
         _id = doc["_id"]
@@ -115,7 +121,7 @@ def pull_elastic_data():
 
 
 # pull_elastic_data()
-schedule.every(3).seconds.do(pull_elastic_data)
+schedule.every(2).minutes.do(pull_elastic_data)
 
 while True:
     schedule.run_pending()

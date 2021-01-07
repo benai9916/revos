@@ -19,9 +19,11 @@ cors = CORS(app)
 
 app.config['DEBUG'] = True
 
-
+distance =0
+arguments = 0
 def model(parms):
 	global  arguments
+	global  distance
 
 	okla_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/cb_combine.sav'))
 
@@ -38,22 +40,25 @@ def model(parms):
 
 @app.route('/')
 def home():
-	try:
 	# a = {'a':arguments[0], 'b': arguments[1], 'c': arguments[2], 'd': arguments[3]}
-		return render_template('index.html', range=distance, four_parms=arguments)
-	except:
-		return 'please reload'
+	# return str(distance), str(arguments)	
+	return render_template('index.html', range=distance, four_parms=arguments)
+	# else:
+	# 	return 'please reload'
 
 
-@app.route('/range', methods=['GET'])
+@app.route('/range', methods=['GET', "POST"])
 def calculate_range():
-	global distance
+	# global distance
 	global four_parms
 	four_parms = request.args.getlist('data')
 
-	distance = model(four_parms)
-	
-	return distance
+	total_range = model(four_parms)
+
+	print('----------', total_range)
+
+	return total_range
+	# return render_template('index.html', range=total_range, four_parms=arguments)
 
 
 
