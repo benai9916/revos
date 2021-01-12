@@ -134,8 +134,8 @@ def filter_data(new_data):
 		# print('------------',send_data)
 
 		if final_df['droppedBatteryVoltage'].values[0] >= 0.01 and final_df['DistanceCovered'].values[0] != 0:
-			# res = requests.get('http://15.206.179.38/range?data='+send_data)
-			res = requests.get('http://127.0.0.1:5000/range?data='+send_data).json()
+			res = requests.get('http://15.206.179.38/range?data='+send_data)
+			# res = requests.get('http://127.0.0.1:5000/range?data='+send_data).json()
 
 			# requests.get('http://15.206.179.38/?data='+send_data)
 

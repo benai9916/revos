@@ -17,7 +17,7 @@ def calculate_soc(final_df):
 	new_soc = json.dumps(send_data.values.tolist())
 
 	# make api call
-	# res = requests.get('http://15.206.179.38/soc?data='+new_soc)
-	res = requests.get('http://127.0.0.1:5000/soc?data='+new_soc)
-
+	# res = requests.get('http://127.0.0.1:5000/soc?data='+new_soc
+	res = requests.get('http://15.206.179.38/soc?data='+new_soc)
+	
 	print(' ============>>>>>>>>>',res.json())

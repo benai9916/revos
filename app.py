@@ -55,12 +55,10 @@ def calculate_range():
 def home():
 	# a = {'a':arguments[0], 'b': arguments[1], 'c': arguments[2], 'd': arguments[3]}
 	# return str(distance), str(arguments)	
-	try:
-		if len(distances) != 0:
-			return render_template('index.html', range=distances[0], four_parms=arguments[0])
-	except:
-		time.sleep(20)
+	if len(distances) != 0:
 		return render_template('index.html', range=distances[0], four_parms=arguments[0])
+	else:
+		return render_template('index.html', error='Refresh after few minute')
 
 
 

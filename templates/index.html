@@ -4,12 +4,15 @@
 	<title>Range</title>
 </head>
 <body>
+	{% if four_parms %}
 	<p>availableBatteryVoltage: {{four_parms[0]}}</p>
 	<p>batteryVoltageUsed: {{four_parms[1]}}</p>
 	<p>DistanceCovered: {{four_parms[2]}}</p>
 	<p>avgGpsSpeed: {{four_parms[3]}}</p>
 	<h2>{{range}}(km)</h2>
 	<br>
-	<!-- <h1>{{dis}}</h1> -->
+	{% else %}
+	<h1>{{error}}</h1>
+	{% endif %}
 </body>
 </html>

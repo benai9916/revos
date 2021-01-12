@@ -120,12 +120,12 @@ def pull_elastic_data():
     print ("\n\ntime elapsed:", time.time()-start_time)
 
 
-# pull_elastic_data()
-schedule.every(6).seconds.do(pull_elastic_data)
+pull_elastic_data()
+# schedule.every(20).seconds.do(pull_elastic_data)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
 
 # print ("\nexporting Pandas objects to different file types.")
 
