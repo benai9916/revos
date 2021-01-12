@@ -12,10 +12,13 @@ import schedule
 import time
 import json
 
+from calculate_soc import *
+
 
 # load_data = pd.read_csv('data/okla_office_white _new.csv')
 
-MIN_VOLTAGE = 46
+min_battey_vol =  47
+max_battery_vol = 72
 
 def pre_process(df):
 	df['time'] = df['timestamp'].apply(lambda x : x.split('T')[1][0:-1])
@@ -31,7 +34,7 @@ def pre_process(df):
 	# new_df_with_tripid['tripId'] = pd.factorize(new_df_with_tripid['tripId'])[0]
 
 	# substract battery voltage with the minimum battery voltage
-	new_df_with_tripid['batteryVoltageAdc'] = new_df_with_tripid['batteryVoltageAdc'].apply(lambda x : x - 46)
+	# new_df_with_tripid['batteryVoltageAdc'] = new_df_with_tripid['batteryVoltageAdc'].apply(lambda x : x - 46)
 
 	filter_data(new_df_with_tripid)
 
@@ -104,6 +107,12 @@ def filter_data(new_data):
 								'droppedBatteryVoltage': dropped_battery_voltage, 'DistanceCovered':distance_covered})
 
 
+		# function to calculate soc
+		calculate_soc(final_df1)
+
+		final_df1['availableBatteryVoltage'] = final_df1['availableBatteryVoltage'].apply(lambda x : x - 46)
+
+
 		final_df1['vin'] = vin
 
 		if len(active_vin) != 0 and final_df1['vin'].values[0] in active_vin:
@@ -132,7 +141,6 @@ def filter_data(new_data):
 
 			print('Data for vim ', active_vin[-1], res)
 
-			# return res
 	else:
 		active_vin.clear()
 		pass

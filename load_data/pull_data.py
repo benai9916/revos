@@ -41,15 +41,15 @@ def pull_elastic_data():
     ELASTICSEARCH DOCUMENTS
     """
     # total num of Elasticsearch documents to get with API call
-    total_docs = 3000
+    total_docs = 2000
     active_vin = []
-    # vim = 'M22YCESD20B000705'
+    vim = 'M22YCESD20B000705'
 
     search_body_v = {
         "query": {
             "bool": {
                 "must": [
-                    # {"match": {'vin': vim}},
+                    {"match": {'vin': vim}},
                     {"match": {'type': 'ANALYTICS'}}
                 ]
             }
@@ -102,7 +102,7 @@ def pull_elastic_data():
         # get _source data dict from document
         source_data = doc["_source"]
 
-        # print((source_data))
+        # print((source_data, '\n'))
 
         # get _id from document
         _id = doc["_id"]
@@ -120,12 +120,12 @@ def pull_elastic_data():
     print ("\n\ntime elapsed:", time.time()-start_time)
 
 
-# pull_elastic_data()
-schedule.every(2).minutes.do(pull_elastic_data)
+pull_elastic_data()
+# schedule.every(6).seconds.do(pull_elastic_data)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
 
 # print ("\nexporting Pandas objects to different file types.")
 
