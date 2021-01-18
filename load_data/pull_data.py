@@ -121,7 +121,7 @@ def pull_elastic_data():
 
 
 pull_elastic_data()
-# schedule.every(20).seconds.do(pull_elastic_data)
+# schedule.every(5).seconds.do(pull_elastic_data)
 
 # while True:
 #     schedule.run_pending()

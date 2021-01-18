@@ -26,7 +26,7 @@ def model(parms):
 
 	okla_catBoost_model = joblib.load(os.path.join(os.getcwd(), 'models/cb_combine.sav'))
 
-	parms = [i for i in json.loads((parms[0]))[0]]
+	# parms = [i for i in json.loads((parms[0]))[0]]
 
 
 	ranges = okla_catBoost_model.predict(np.array([parms]))
@@ -41,11 +41,20 @@ def model(parms):
 
 @app.route('/range', methods=['GET', "POST"])
 def calculate_range():
-	four_parms = request.args.getlist('data')
+	four_parms = []
+	a = request.args.to_dict()
+
+	for i in a:
+		my_dict = json.loads(i)
+		# print('=============', json.loads(i))
+
+	for i in my_dict.keys():
+		four_parms.append(my_dict[i])
+		# print('--==', four_parms)
 
 	total_range = model(four_parms)
 
-	# print('----------', total_range)
+	print('----------', total_range)
 
 	return total_range
 	# return render_template('index.html', range=distance, four_parms=arguments)
@@ -68,15 +77,18 @@ def calculate_soc():
 	global new_soc_val
 	new_soc_val.clear()
 
-	all_parms = request.args.getlist('data')
+	a = request.args.to_dict()
 
-	parms = [i for i in json.loads((all_parms[0]))[0]]
+	for i in a:
+		my_dict = json.loads(i)
+		# print('=============', json.loads(i))
 
-	# print('===================>', parms[-1])
+	for i in my_dict.keys():
+		new_soc_val.append(my_dict[i])
+	
+	print('===============', new_soc_val)
 
-	new_soc_val.append(parms)
-
-	return {'new_soc': parms[-1]}
+	return {'new_soc': new_soc_val[-1]}
 
 
 @app.route('/soc_val')
