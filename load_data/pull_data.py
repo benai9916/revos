@@ -41,7 +41,7 @@ def pull_elastic_data():
     ELASTICSEARCH DOCUMENTS
     """
     # total num of Elasticsearch documents to get with API call
-    total_docs = 20
+    total_docs = 2000
     active_vin = []
     vim = 'M22YCESD20B000705'
 

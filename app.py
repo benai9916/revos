@@ -31,7 +31,7 @@ def model(parms):
 
 	ranges = okla_catBoost_model.predict(np.array([parms]))
 
-	distance = {'range': round(ranges.tolist()[0],2)}
+	distance = {'range': abs(round(ranges.tolist()[0],2))}
 
 	arguments.append(parms)
 	distances.append(distance)
@@ -46,44 +46,55 @@ def calculate_range():
 
 	for i in a.keys():
 		four_parms.append(a[i])
-		print('--==', four_parms)
+		# print('--==', four_parms)
 
 	total_range = model(four_parms)
 
 	print('----------', total_range)
 
 	return total_range
-	return render_template('index.html', range=distance, four_parms=arguments)
+	# return render_template('index.html', range = abs(distance), four_parms=arguments)
 
 
 @app.route('/')
 def home():
 	if len(distances) != 0:
-		return render_template('index.html', range=distances[0], four_parms=arguments[0])
+		return render_template('index.html', range= distances[0], four_parms=arguments[0])
 	else:
 		return render_template('index.html', error='Refresh after few minute')
 
 
 
 new_soc_val = []
+min_battey_vol =  47
+max_battery_vol = 72
+stabalize_value = 2
 @app.route('/soc', methods=['GET', "POST"])
 def calculate_soc():
 	global new_soc_val
 	new_soc_val.clear()
 
-	a = request.args.to_dict()
+	all_params = request.args.to_dict()
 
-	for i in a.keys():
-		new_soc_val.append(a[i])
+	for i in all_params.keys():
+		new_soc_val.append(all_params[i])
+
+	# calculate soc
+	new_voltage = float(all_params['availableBatteryVoltage']) + stabalize_value
+
+	final_soc = (new_voltage - min_battey_vol) / (max_battery_vol - min_battey_vol) * 100 
+
+	# append the soc
+	new_soc_val.append(final_soc)
 	
-	print('===============', new_soc_val)
+	print('===============', final_soc)
 
-	return {'new_soc': new_soc_val[-1]}
+	return {'new_soc': abs(final_soc)}
 
 
 @app.route('/soc_val')
 def dsiaply_soc():
-	return render_template('soc.html', soc_parms=new_soc_val)
+	return render_template('soc.html', soc_parms = abs(new_soc_val))
 
 
 

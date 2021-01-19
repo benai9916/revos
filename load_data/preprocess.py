@@ -144,7 +144,7 @@ def filter_data(new_data):
 
 		# requests.get('http://15.206.179.38/?data='+send_data)
 
-			print('Data for vim ', active_vin[-1], res.json())
+			print('Data for vim --> ', active_vin[-1], res.json())
 
 	else:
 		active_vin.clear()
