@@ -129,19 +129,18 @@ def filter_data(new_data):
 
 		# args = {'data': final_df.values.tolist()}
 
-		send_data = json.dumps(
-			{'availableBatteryVoltage': final_df.values[0][0],
+		send_data = {'availableBatteryVoltage': final_df.values[0][0],
 			 'droppedBatteryVoltage':  final_df.values[0][1],
 			 'DistanceCovered' : final_df.values[0][2] ,
 			 'avgGpsSpeed' : final_df.values[0][3]
 			}
-		)
+
 
 		# print('------------',send_data)
 
 		if final_df['droppedBatteryVoltage'].values[0] >= 0.01 and final_df['DistanceCovered'].values[0] != 0:
-			res = requests.get('http://15.206.179.38/range?'+send_data)
-			# res = requests.get('http://127.0.0.1:5000/range?'+send_data)
+			res = requests.get('http://15.206.179.38/range?', params=send_data)
+			# res = requests.get('http://127.0.0.1:5000/range?', params=send_data)
 
 		# requests.get('http://15.206.179.38/?data='+send_data)
 

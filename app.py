@@ -44,26 +44,20 @@ def calculate_range():
 	four_parms = []
 	a = request.args.to_dict()
 
-	for i in a:
-		my_dict = json.loads(i)
-		# print('=============', json.loads(i))
-
-	for i in my_dict.keys():
-		four_parms.append(my_dict[i])
-		# print('--==', four_parms)
+	for i in a.keys():
+		four_parms.append(a[i])
+		print('--==', four_parms)
 
 	total_range = model(four_parms)
 
 	print('----------', total_range)
 
 	return total_range
-	# return render_template('index.html', range=distance, four_parms=arguments)
+	return render_template('index.html', range=distance, four_parms=arguments)
 
 
 @app.route('/')
 def home():
-	# a = {'a':arguments[0], 'b': arguments[1], 'c': arguments[2], 'd': arguments[3]}
-	# return str(distance), str(arguments)	
 	if len(distances) != 0:
 		return render_template('index.html', range=distances[0], four_parms=arguments[0])
 	else:
@@ -79,12 +73,8 @@ def calculate_soc():
 
 	a = request.args.to_dict()
 
-	for i in a:
-		my_dict = json.loads(i)
-		# print('=============', json.loads(i))
-
-	for i in my_dict.keys():
-		new_soc_val.append(my_dict[i])
+	for i in a.keys():
+		new_soc_val.append(a[i])
 	
 	print('===============', new_soc_val)
 
